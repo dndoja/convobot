@@ -19,12 +19,14 @@ class _Body extends StatefulWidget {
 
 class __BodyState extends State<_Body> {
   late final List<ConversationMessage> _messages;
+  late final ChatGptConversationEngine _conversationEngine;
 
   bool isWaitingForResponse = false;
 
   @override
   void initState() {
     super.initState();
+    _conversationEngine = ChatGptConversationEngine();
     _messages = [];
   }
 
@@ -51,19 +53,17 @@ class __BodyState extends State<_Body> {
       );
     });
 
-    final response = await sendChatGptMessage(message);
-    if (!mounted || response.choices.isEmpty) return;
+    final String response = await _conversationEngine.sendMessage(message);
+    if (!mounted) return;
 
     setState(
       () {
         isWaitingForResponse = false;
-        _messages.addAll(
-          response.choices.map(
-            (r) => ConversationMessage(
-              r.message.content,
-              sender: MessageSender.ai,
-              timestamp: response.created.toLocal(),
-            ),
+        _messages.add(
+          ConversationMessage(
+            response,
+            sender: MessageSender.ai,
+            timestamp: DateTime.now(),
           ),
         );
       },
