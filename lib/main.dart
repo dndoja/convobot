@@ -1,7 +1,11 @@
+import 'package:convobot/services/init.dart';
+
 import 'package:convobot/ui/screens/conversation.dart';
 import 'package:flutter/cupertino.dart';
 
-void main() {
+Future<void> main() async {
+  await initializeServices();
+
   runApp(const MyApp());
 }
 

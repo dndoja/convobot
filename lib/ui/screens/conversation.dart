@@ -1,4 +1,5 @@
 import 'package:convobot/models/models.dart';
+import 'package:convobot/services/openai.dart';
 import 'package:convobot/ui/widgets/widgets.dart';
 import 'package:convobot/utils/utils.dart';
 
@@ -19,6 +20,8 @@ class _Body extends StatefulWidget {
 class __BodyState extends State<_Body> {
   late final List<ConversationMessage> _messages;
 
+  bool isWaitingForResponse = false;
+
   @override
   void initState() {
     super.initState();
@@ -30,20 +33,42 @@ class __BodyState extends State<_Body> {
         children: [
           Expanded(child: _Chat(_messages)),
           _ResponseField(
-            onSubmit: (msg) => setState(
-              () => _messages.add(
-                ConversationMessage(
-                  msg,
-                  sender: _messages.length.isEven
-                      ? MessageSender.user
-                      : MessageSender.ai,
-                  timestamp: DateTime.now().toUtc(),
-                ),
-              ),
-            ),
+            active: !isWaitingForResponse,
+            onSubmit: sendMessage,
           ),
         ],
       );
+
+  Future<void> sendMessage(String message) async {
+    setState(() {
+      isWaitingForResponse = true;
+      _messages.add(
+        ConversationMessage(
+          message,
+          sender: MessageSender.user,
+          timestamp: DateTime.now(),
+        ),
+      );
+    });
+
+    final response = await sendChatGptMessage(message);
+    if (!mounted || response.choices.isEmpty) return;
+
+    setState(
+      () {
+        isWaitingForResponse = false;
+        _messages.addAll(
+          response.choices.map(
+            (r) => ConversationMessage(
+              r.message.content,
+              sender: MessageSender.ai,
+              timestamp: response.created.toLocal(),
+            ),
+          ),
+        );
+      },
+    );
+  }
 }
 
 class _Chat extends StatelessWidget {
@@ -68,7 +93,12 @@ class _Chat extends StatelessWidget {
 }
 
 class _ResponseField extends StatefulWidget {
-  const _ResponseField({required this.onSubmit});
+  const _ResponseField({
+    required this.onSubmit,
+    this.active = true,
+  });
+
+  final bool active;
   final void Function(String) onSubmit;
 
   @override
@@ -104,8 +134,11 @@ class __ResponseFieldState extends State<_ResponseField> {
             onTap: _onSubmit,
             child: Container(
               padding: const EdgeInsets.all(8),
-              child: const Icon(
+              child: Icon(
                 CupertinoIcons.arrow_up_circle_fill,
+                color: widget.active
+                    ? CupertinoColors.activeBlue
+                    : CupertinoColors.inactiveGray,
                 size: 32,
               ),
             ),
@@ -115,7 +148,7 @@ class __ResponseFieldState extends State<_ResponseField> {
       );
 
   void _onSubmit() {
-    if (!hasValidInput) return;
+    if (!hasValidInput || !widget.active) return;
 
     widget.onSubmit(_controller.text);
     _controller.clear();
