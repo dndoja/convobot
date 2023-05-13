@@ -6,17 +6,32 @@ version: 1.0.0+1
 
 environment:
   sdk: '>=2.19.6 <3.0.0'
+  flutter: 3.7.12
+
+scripts:
+  build:
+    g:
+      - dart pub get && dart run build_runner build --delete-conflicting-outputs
+      - find lib -name '*.g.dart' -exec sed -i'.bak' -e 's/.singleWhere(/.firstWhere(/g' {} + && find lib -name '*.g.dart.bak' -delete
 
 dependencies:
   flutter:
     sdk: flutter
-  dart_openai: ^1.9.91
   cupertino_icons: ^1.0.2
+  dart_openai: ^1.9.91
+  dartx: ^1.1.0
+  data_classes:
+    git: https://github.com/priezz/data_classes.git
+  provider: ^6.0.4
 
 dev_dependencies:
+  analyzer: ^5.10.0
   flutter_test:
     sdk: flutter
   flutter_lints: ^2.0.0
-  
+  build: ^2.3.1
+  build_runner: ^2.3.3
+  code_builder: ^4.4.0
+
 flutter:
   uses-material-design: true

@@ -1,4 +1,4 @@
-package com.example.convobot
+package com.ndoy.convobot
 
 import io.flutter.embedding.android.FlutterActivity
 
