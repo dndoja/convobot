@@ -12,6 +12,8 @@ scripts:
 
 dependencies:
   functions_framework: ^0.4.0
+  googleapis: ^11.0.0
+  googleapis_auth: ^1.4.0
   shelf: ^1.0.0
 
 dev_dependencies:

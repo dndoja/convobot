@@ -7,6 +7,8 @@ WORKDIR /app
 COPY pubspec.* ./
 RUN dart pub get
 
+COPY ./.keys ./.keys
+
 # Copy app source code and AOT compile it.
 COPY . .
 # Ensure packages are still up-to-date if anything has changed

@@ -14,7 +14,7 @@
 // limitations under the License.
 
 import 'package:functions_framework/serve.dart';
-import 'package:server/functions.dart' as function_library;
+import 'package:server/text_to_speech.dart' as function_library;
 
 Future<void> main(List<String> args) async {
   await serve(args, _nameToFunctionTarget);
