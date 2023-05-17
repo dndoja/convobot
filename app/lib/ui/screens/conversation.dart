@@ -1,4 +1,4 @@
-import 'package:convobot/models/models.dart';
+import 'package:common/models/models.dart';
 import 'package:convobot/services/openai.dart';
 import 'package:convobot/ui/widgets/widgets.dart';
 import 'package:convobot/utils/utils.dart';
@@ -46,8 +46,8 @@ class __BodyState extends State<_Body> {
       isWaitingForResponse = true;
       _messages.add(
         ConversationMessage(
-          message,
           sender: MessageSender.user,
+          text: message,
           timestamp: DateTime.now(),
         ),
       );
@@ -61,8 +61,8 @@ class __BodyState extends State<_Body> {
         isWaitingForResponse = false;
         _messages.add(
           ConversationMessage(
-            response,
             sender: MessageSender.ai,
+            text: response,
             timestamp: DateTime.now(),
           ),
         );

@@ -1,0 +1,24 @@
+name: common
+description: A sample command-line application.
+version: 1.0.0
+publish_to: none
+
+scripts:
+  build:
+    g:
+      - dart pub get && dart run build_runner build --delete-conflicting-outputs
+      - find lib -name '*.g.dart' -exec sed -i'.bak' -e 's/.singleWhere(/.firstWhere(/g' {} + && find lib -name '*.g.dart.bak' -delete
+
+environment:
+  sdk: '>=2.19.6 <3.0.0'
+
+dependencies:
+  data_classes:
+    git: https://github.com/priezz/data_classes.git
+
+dev_dependencies:
+  analyzer: ^5.10.0
+  build: ^2.3.1
+  build_runner: ^2.3.3
+  lints: ^2.0.0
+  test: ^1.21.0

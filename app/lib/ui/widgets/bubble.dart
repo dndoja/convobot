@@ -1,5 +1,5 @@
-import 'package:convobot/models/message.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:common/models/message.dart';
 
 class Bubble extends StatelessWidget {
   const Bubble({

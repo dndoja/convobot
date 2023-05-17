@@ -17,6 +17,8 @@ scripts:
 dependencies:
   flutter:
     sdk: flutter
+  common:
+    path: ../common
   cupertino_icons: ^1.0.2
   dart_openai: ^1.9.91
   dartx: ^1.1.0

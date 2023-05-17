@@ -1,1 +1,0 @@
-FUNCTION_TARGET=$1 dart run
