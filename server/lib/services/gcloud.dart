@@ -1,3 +1,4 @@
+import 'package:edge_http_client/edge_http_client.dart';
 import 'package:googleapis/texttospeech/v1.dart';
 import "package:googleapis_auth/auth_io.dart";
 import 'package:supabase_functions/supabase_functions.dart';
@@ -6,7 +7,7 @@ late AuthClient _client;
 
 const List<String> _scopes = [TexttospeechApi.cloudPlatformScope];
 
-void initializeGCloud() async {
+void initializeGCloud(EdgeHttpClient? edgeClient) async {
   _client = await clientViaServiceAccount(
     ServiceAccountCredentials(
       Deno.env.get('GCLOUD_SERVICE_EMAIL')!,
@@ -14,6 +15,7 @@ void initializeGCloud() async {
       Deno.env.get('GCLOUD_SERVICE_KEY')!,
     ),
     _scopes,
+    baseClient: edgeClient,
   );
 }
 

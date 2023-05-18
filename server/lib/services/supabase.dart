@@ -4,9 +4,9 @@ import 'package:supabase_functions/supabase_functions.dart';
 
 late final SupabaseClient supabase;
 
-void initializeSupabase() => supabase = SupabaseClient(
+void initializeSupabase(EdgeHttpClient? edgeClient) => supabase = SupabaseClient(
       Deno.env.get('SUPABASE_URL')!,
       // Use service role key to bypass RLS
       Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!,
-      httpClient: EdgeHttpClient(),
+      httpClient: edgeClient,
     );
