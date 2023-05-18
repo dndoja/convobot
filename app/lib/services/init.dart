@@ -1,8 +1,7 @@
-import 'package:dart_openai/openai.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'apis.dart';
 
 Future<void> initializeServices() async {
   await dotenv.load();
-
-  OpenAI.apiKey = dotenv.env['OPENAI_KEY']!;
+  initializeApiClient();
 }

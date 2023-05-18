@@ -5,9 +5,9 @@ import 'functions/functions.dart' as fn;
 typedef RequestHandler = FutureOr<Response> Function(Request request);
 
 class RouteSettings {
-  const RouteSettings(this.handler, {this.supportedMethods = const ['GET']});
+  const RouteSettings(this.handler, {this.method = 'POST'});
   final RequestHandler handler;
-  final List<String> supportedMethods;
+  final String method;
 }
 
 enum Route {

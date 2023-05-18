@@ -1,6 +1,6 @@
 import 'package:data_classes/data_classes.dart';
 
-part 'message.g.dart';
+part 'conversation.g.dart';
 
 enum MessageSender { ai, user, narrator }
 
@@ -8,5 +8,10 @@ enum MessageSender { ai, user, narrator }
 class _ConversationMessageModel {
   late MessageSender sender;
   late String text;
-  late DateTime timestamp;
+}
+
+@data
+class _ConversationResponseModel {
+  late ConversationMessage message;
+  String? messageAudio;
 }

@@ -17,7 +17,7 @@ void main() {
     );
     if (route == null) return Response('Not found', status: 404);
 
-    if (!route.settings.supportedMethods.contains(request.method)) {
+    if (route.settings.method != request.method) {
       return Response('Bad Request', status: 400);
     }
 

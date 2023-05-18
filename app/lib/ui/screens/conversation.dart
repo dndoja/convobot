@@ -1,5 +1,5 @@
 import 'package:common/models/models.dart';
-import 'package:convobot/services/openai.dart';
+import 'package:convobot/services/conversation.dart';
 import 'package:convobot/ui/widgets/widgets.dart';
 import 'package:convobot/utils/utils.dart';
 
@@ -19,14 +19,14 @@ class _Body extends StatefulWidget {
 
 class __BodyState extends State<_Body> {
   late final List<ConversationMessage> _messages;
-  late final ChatGptConversationEngine _conversationEngine;
+  late final ConversationEngine _conversationEngine;
 
   bool isWaitingForResponse = false;
 
   @override
   void initState() {
     super.initState();
-    _conversationEngine = ChatGptConversationEngine();
+    _conversationEngine = ConversationEngine();
     _messages = [];
   }
 
@@ -41,31 +41,25 @@ class __BodyState extends State<_Body> {
         ],
       );
 
-  Future<void> sendMessage(String message) async {
+  Future<void> sendMessage(String messageText) async {
+    final ConversationMessage message = ConversationMessage(
+      sender: MessageSender.user,
+      text: messageText,
+    );
+    
     setState(() {
       isWaitingForResponse = true;
-      _messages.add(
-        ConversationMessage(
-          sender: MessageSender.user,
-          text: message,
-          timestamp: DateTime.now(),
-        ),
-      );
+      _messages.add(message);
     });
 
-    final String response = await _conversationEngine.sendMessage(message);
-    if (!mounted) return;
+    final ConversationResponse? response =
+        await _conversationEngine.sendMessage(message);
+    if (!mounted || response == null) return;
 
     setState(
       () {
         isWaitingForResponse = false;
-        _messages.add(
-          ConversationMessage(
-            sender: MessageSender.ai,
-            text: response,
-            timestamp: DateTime.now(),
-          ),
-        );
+        _messages.add(response.message);
       },
     );
   }

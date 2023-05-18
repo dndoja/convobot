@@ -13,13 +13,13 @@ void initializeOpenAI(EdgeHttpClient? edgeClient) => _client = OpenAIClient(
       httpClient: edgeClient,
     );
 
-Future<ConversationMessage> fetchNextMessageInConversation(
-  Iterable<ConversationMessage> conversation,
+Future<ConversationMessage> sendMessagesToChatGPT(
+  Iterable<ConversationMessage> messages,
 ) =>
     _client.chat
         .create(
           model: "gpt-3.5-turbo",
-          messages: conversation
+          messages: messages
               .map(
                 (m) => ChatMessage(
                   role: m.sender.openAiMessageRole,
@@ -33,7 +33,6 @@ Future<ConversationMessage> fetchNextMessageInConversation(
           (r) => ConversationMessage(
             sender: MessageSender.ai,
             text: r.choices.map((c) => c.message.content).join('\n'),
-            timestamp: DateTime.now().toUtc(),
           ),
         );
 
