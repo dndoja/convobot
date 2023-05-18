@@ -12,7 +12,7 @@ void main() {
 
   SupabaseFunctions(fetch: (request) {
     final Route? route = enumFromString(
-      request.url.pathSegments.firstOrNull,
+      request.url.pathSegments.lastOrNull,
       Route.values,
     );
     if (route == null) return Response('Not found', status: 404);
