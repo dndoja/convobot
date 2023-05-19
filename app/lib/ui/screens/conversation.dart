@@ -1,3 +1,6 @@
+import 'dart:convert';
+import 'package:soundpool/soundpool.dart';
+
 import 'package:common/models/models.dart';
 import 'package:convobot/services/conversation.dart';
 import 'package:convobot/ui/widgets/widgets.dart';
@@ -18,16 +21,23 @@ class _Body extends StatefulWidget {
 }
 
 class __BodyState extends State<_Body> {
+  late final Soundpool _audioPlayer;
   late final List<ConversationMessage> _messages;
   late final ConversationEngine _conversationEngine;
-
   bool isWaitingForResponse = false;
 
   @override
   void initState() {
     super.initState();
+    _audioPlayer = Soundpool.fromOptions();
     _conversationEngine = ConversationEngine();
     _messages = [];
+  }
+
+  @override
+  void dispose() {
+    _audioPlayer.dispose();
+    super.dispose();
   }
 
   @override
@@ -46,7 +56,7 @@ class __BodyState extends State<_Body> {
       sender: MessageSender.user,
       text: messageText,
     );
-    
+
     setState(() {
       isWaitingForResponse = true;
       _messages.add(message);
@@ -62,6 +72,14 @@ class __BodyState extends State<_Body> {
         _messages.add(response.message);
       },
     );
+
+    final String? rawSound = response.messageAudio;
+    if (rawSound != null) {
+      final int soundId = await _audioPlayer.loadUint8List(
+        base64Decode(rawSound),
+      );
+      await _audioPlayer.play(soundId);
+    }
   }
 }
 
