@@ -1,43 +1,36 @@
-import 'dart:convert';
 import 'package:common/models/models.dart';
 import 'package:http/http.dart' as http;
-import 'package:flutter_dotenv/flutter_dotenv.dart';
 
-String get _edgeFunctionsUrl => dotenv.env['FUNCTIONS_URL']!;
+import 'supabase.dart';
 
 late final ApiClient apiClient;
 
-void initializeApiClient([ApiClient? client]) =>
-    apiClient = client ?? ApiClient(http.Client());
+void initializeApiClient([ApiClient? client]) => apiClient = client ??
+    ApiClient(
+      httpClient: http.Client(),
+      supabaseClient: supabase,
+    );
 
 class ApiClient {
-  const ApiClient(this.client);
-  final http.Client client;
+  const ApiClient({
+    required this.httpClient,
+    required this.supabaseClient,
+  });
+  final http.Client httpClient;
+  final SupabaseClient supabaseClient;
 
   Future<ConversationResponse?> getConversationResponse(
     List<ConversationMessage> messages,
   ) async {
     try {
-      final http.Response response = await client.callEdgeFunction(
-        'getConversationResponse',
+      final FunctionResponse response = await supabaseClient.functions.invoke(
+        'dart_edge/getConversationResponse',
         body: {'messages': messages.map((m) => m.toJson()).toList()},
       );
 
-      return ConversationResponse.fromJson(json.decode(response.body));
+      return ConversationResponse.fromJson(response.data);
     } catch (x) {
       return null;
     }
   }
-}
-
-extension on http.Client {
-  Future<http.Response> callEdgeFunction(
-    String functionName, {
-    Map<String, dynamic>? body,
-  }) =>
-      post(
-        Uri.parse('$_edgeFunctionsUrl/$functionName'),
-        body: body != null ? json.encode(body) : null,
-        headers: {'Authorization': 'Bearer token'},
-      );
 }
