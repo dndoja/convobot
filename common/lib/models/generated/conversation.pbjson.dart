@@ -24,7 +24,7 @@ final $typed_data.Uint8List messageAuthorDescriptor = $convert.base64Decode('Cg1
 const ConversationMessage$json = const {
   '1': 'ConversationMessage',
   '2': const [
-    const {'1': 'timestamp', '3': 1, '4': 1, '5': 5, '10': 'timestamp'},
+    const {'1': 'timestamp', '3': 1, '4': 1, '5': 9, '10': 'timestamp'},
     const {'1': 'author', '3': 2, '4': 1, '5': 14, '6': '.MessageAuthor', '10': 'author'},
     const {'1': 'text', '3': 3, '4': 1, '5': 9, '9': 0, '10': 'text', '17': true},
     const {'1': 'audio', '3': 4, '4': 1, '5': 12, '9': 1, '10': 'audio', '17': true},
@@ -38,4 +38,4 @@ const ConversationMessage$json = const {
 };
 
 /// Descriptor for `ConversationMessage`. Decode as a `google.protobuf.DescriptorProto`.
-final $typed_data.Uint8List conversationMessageDescriptor = $convert.base64Decode('ChNDb252ZXJzYXRpb25NZXNzYWdlEhwKCXRpbWVzdGFtcBgBIAEoBVIJdGltZXN0YW1wEiYKBmF1dGhvchgCIAEoDjIOLk1lc3NhZ2VBdXRob3JSBmF1dGhvchIXCgR0ZXh0GAMgASgJSABSBHRleHSIAQESGQoFYXVkaW8YBCABKAxIAVIFYXVkaW+IAQESIQoJaXNQYXJ0aWFsGAUgASgISAJSCWlzUGFydGlhbIgBAUIHCgVfdGV4dEIICgZfYXVkaW9CDAoKX2lzUGFydGlhbA==');
+final $typed_data.Uint8List conversationMessageDescriptor = $convert.base64Decode('ChNDb252ZXJzYXRpb25NZXNzYWdlEhwKCXRpbWVzdGFtcBgBIAEoCVIJdGltZXN0YW1wEiYKBmF1dGhvchgCIAEoDjIOLk1lc3NhZ2VBdXRob3JSBmF1dGhvchIXCgR0ZXh0GAMgASgJSABSBHRleHSIAQESGQoFYXVkaW8YBCABKAxIAVIFYXVkaW+IAQESIQoJaXNQYXJ0aWFsGAUgASgISAJSCWlzUGFydGlhbIgBAUIHCgVfdGV4dEIICgZfYXVkaW9CDAoKX2lzUGFydGlhbA==');

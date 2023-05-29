@@ -8,7 +8,7 @@ enum MessageAuthor {
 
 message ConversationMessage {
     // The unix timestamp in milliseconds
-    int32 timestamp = 1;
+    string timestamp = 1;
     MessageAuthor author = 2;
     optional string text = 3;
     optional bytes audio = 4;

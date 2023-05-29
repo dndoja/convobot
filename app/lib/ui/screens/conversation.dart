@@ -111,7 +111,7 @@ class __BodyState extends State<_Body> {
             (s) => ConversationMessage(
               audio: s,
               author: MessageAuthor.user,
-              timestamp: DateTime.now().millisecondsSinceEpoch,
+              timestamp: DateTime.now().millisecondsSinceEpoch.toString(),
             ),
           ),
         )

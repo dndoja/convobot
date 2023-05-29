@@ -15,7 +15,7 @@ export 'conversation.pbenum.dart';
 
 class ConversationMessage extends $pb.GeneratedMessage {
   static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'ConversationMessage', createEmptyInstance: create)
-    ..a<$core.int>(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'timestamp', $pb.PbFieldType.O3)
+    ..aOS(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'timestamp')
     ..e<MessageAuthor>(2, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'author', $pb.PbFieldType.OE, defaultOrMaker: MessageAuthor.user, valueOf: MessageAuthor.valueOf, enumValues: MessageAuthor.values)
     ..aOS(3, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'text')
     ..a<$core.List<$core.int>>(4, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'audio', $pb.PbFieldType.OY)
@@ -25,7 +25,7 @@ class ConversationMessage extends $pb.GeneratedMessage {
 
   ConversationMessage._() : super();
   factory ConversationMessage({
-    $core.int? timestamp,
+    $core.String? timestamp,
     MessageAuthor? author,
     $core.String? text,
     $core.List<$core.int>? audio,
@@ -71,9 +71,9 @@ class ConversationMessage extends $pb.GeneratedMessage {
   static ConversationMessage? _defaultInstance;
 
   @$pb.TagNumber(1)
-  $core.int get timestamp => $_getIZ(0);
+  $core.String get timestamp => $_getSZ(0);
   @$pb.TagNumber(1)
-  set timestamp($core.int v) { $_setSignedInt32(0, v); }
+  set timestamp($core.String v) { $_setString(0, v); }
   @$pb.TagNumber(1)
   $core.bool hasTimestamp() => $_has(0);
   @$pb.TagNumber(1)

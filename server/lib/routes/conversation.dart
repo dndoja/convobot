@@ -32,7 +32,7 @@ class ConversationService extends ConversationServiceBase {
               author: MessageAuthor.user,
               isPartial: !response.results.first.isFinal,
               text: response.results.first.alternatives.first.transcript,
-              timestamp: DateTime.now().millisecondsSinceEpoch,
+              timestamp: DateTime.now().millisecondsSinceEpoch.toString(),
             )
           : null,
     );
