@@ -1,5 +1,5 @@
 import 'package:flutter/cupertino.dart';
-import 'package:common/models/conversation.dart' show ConversationMessage;
+import 'package:common/models/models.dart' show ConversationMessage;
 
 class Bubble extends StatelessWidget {
   const Bubble({

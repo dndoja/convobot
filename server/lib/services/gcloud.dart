@@ -1,21 +1,18 @@
-import 'package:edge_http_client/edge_http_client.dart';
 import 'package:googleapis/texttospeech/v1.dart';
 import "package:googleapis_auth/auth_io.dart";
-import 'package:supabase_functions/supabase_functions.dart';
+import 'package:google_speech/google_speech.dart';
+import 'package:server/services/secrets.dart';
+import 'package:google_speech/generated/google/cloud/speech/v1/cloud_speech.pb.dart'
+    show StreamingRecognizeResponse;
 
 late AuthClient _client;
 
 const List<String> _scopes = [TexttospeechApi.cloudPlatformScope];
 
-void initializeGCloud(EdgeHttpClient? edgeClient) async {
+void initializeGCloud() async {
   _client = await clientViaServiceAccount(
-    ServiceAccountCredentials(
-      Deno.env.get('GCLOUD_SERVICE_EMAIL')!,
-      ClientId.serviceAccount(Deno.env.get('GCLOUD_CLIENT_ID')!),
-      Deno.env.get('GCLOUD_SERVICE_KEY')!,
-    ),
+    ServiceAccountCredentials.fromJson(Secrets.get().googleServiceAccount),
     _scopes,
-    baseClient: edgeClient,
   );
 }
 
@@ -34,3 +31,23 @@ Future<String?> generateSpeechFromText(String text) async =>
           ),
         )
         .then((response) => response.audioContent);
+
+/// Uses google speech to transcript text from the FLAC encoded audio passed
+/// via [rawAudioStream]. Audio language must match [languageCode].
+Stream<StreamingRecognizeResponse> generateTextFromSpeech(
+  Stream<List<int>> rawAudioStream, {
+  String languageCode = 'en',
+}) =>
+    SpeechToText.viaServiceAccount(
+      ServiceAccount.fromString(Secrets.get().googleServiceAccount),
+    ).streamingRecognize(
+      StreamingRecognitionConfig(
+        config: RecognitionConfig(
+          sampleRateHertz: 44000,
+          encoding: AudioEncoding.LINEAR16,
+          languageCode: languageCode,
+        ),
+        interimResults: true,
+      ),
+      rawAudioStream,
+    );

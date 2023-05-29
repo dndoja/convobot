@@ -1,0 +1,20 @@
+syntax = "proto3";
+
+enum MessageAuthor {
+    user=0;
+    ai=1;
+    narrator=2;
+}
+
+message ConversationMessage {
+    // The unix timestamp in milliseconds
+    int32 timestamp = 1;
+    MessageAuthor author = 2;
+    optional string text = 3;
+    optional bytes audio = 4;
+    optional bool isPartial = 5;
+}
+
+service Conversation {
+    rpc Converse(stream ConversationMessage) returns (stream ConversationMessage) {}
+}

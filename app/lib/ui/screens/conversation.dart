@@ -1,8 +1,13 @@
-import 'dart:convert';
+import 'dart:async';
+import 'dart:typed_data';
+
+import 'package:flutter_audio_capture/flutter_audio_capture.dart';
+import 'package:permission_handler/permission_handler.dart';
 import 'package:soundpool/soundpool.dart';
 
 import 'package:common/models/models.dart';
-import 'package:convobot/services/conversation.dart';
+
+import 'package:convobot/services/grpc_client.dart';
 import 'package:convobot/ui/widgets/widgets.dart';
 import 'package:convobot/utils/utils.dart';
 
@@ -22,22 +27,58 @@ class _Body extends StatefulWidget {
 
 class __BodyState extends State<_Body> {
   late final Soundpool _audioPlayer;
+  late final FlutterAudioCapture _audioRecorder;
   late final List<ConversationMessage> _messages;
-  late final ConversationEngine _conversationEngine;
+  late final GrpcClient _conversationClient;
+  late final StreamController<Uint8List> _audioStreamController =
+      StreamController();
+  late final TextEditingController _textController;
+
+  final List<Uint8List> _audioBuffer = [];
+
   bool isWaitingForResponse = false;
+  bool isRecording = false;
 
   @override
   void initState() {
     super.initState();
     _audioPlayer = Soundpool.fromOptions();
-    _conversationEngine = ConversationEngine();
+    _audioRecorder = FlutterAudioCapture();
+    _conversationClient = GrpcClient.get();
     _messages = [];
+    _textController = TextEditingController();
   }
 
   @override
   void dispose() {
     _audioPlayer.dispose();
+    _conversationClient.dispose();
+    _textController.dispose();
     super.dispose();
+  }
+
+  void _onMessage(ConversationMessage message) async {
+    if (!mounted || message.author == MessageAuthor.narrator) return;
+
+    setState(
+      () {
+        _messages.add(message);
+        if (message.author == MessageAuthor.ai) {
+          isWaitingForResponse = false;
+        } else {
+          _textController.text = message.text;
+        }
+      },
+    );
+
+    if (message.author == MessageAuthor.ai) {
+      if (message.audio.isNotEmpty) {
+        final int soundId = await _audioPlayer.loadUint8List(
+          Uint8List.fromList(message.audio),
+        );
+        await _audioPlayer.play(soundId);
+      }
+    }
   }
 
   @override
@@ -46,40 +87,50 @@ class __BodyState extends State<_Body> {
           Expanded(child: _Chat(_messages)),
           _ResponseField(
             active: !isWaitingForResponse,
-            onSubmit: sendMessage,
+            controller: _textController,
+            onSubmit: (_) {},
+          ),
+          CupertinoButton(
+            child: Text(isRecording ? '...' : 'Record'),
+            onPressed: () => isRecording ? recordEnd() : recordStart(),
+            color: isRecording
+                ? CupertinoColors.activeBlue
+                : CupertinoColors.white,
           ),
         ],
       );
 
-  Future<void> sendMessage(String messageText) async {
-    final ConversationMessage message = ConversationMessage(
-      sender: MessageSender.user,
-      text: messageText,
+  Future<void> recordStart() async {
+    await Permission.microphone.request();
+
+    setState(() => isRecording = true);
+
+    _conversationClient
+        .subscribeToConversation(
+          _audioStreamController.stream.map(
+            (s) => ConversationMessage(
+              audio: s,
+              author: MessageAuthor.user,
+              timestamp: DateTime.now().millisecondsSinceEpoch,
+            ),
+          ),
+        )
+        .listen(_onMessage);
+
+    await _audioRecorder.start(
+      (data) => _audioBuffer
+          .add(pcmInt16FromFloat32(Float64List.fromList(data.cast<double>()))),
+      // ignore: avoid_print
+      print,
+      waitForFirstDataOnAndroid: false,
     );
+  }
 
-    setState(() {
-      isWaitingForResponse = true;
-      _messages.add(message);
-    });
-
-    final ConversationResponse? response =
-        await _conversationEngine.sendMessage(message);
-    if (!mounted || response == null) return;
-
-    setState(
-      () {
-        isWaitingForResponse = false;
-        _messages.add(response.message);
-      },
-    );
-
-    final String? rawSound = response.messageAudio;
-    if (rawSound != null) {
-      final int soundId = await _audioPlayer.loadUint8List(
-        base64Decode(rawSound),
-      );
-      await _audioPlayer.play(soundId);
-    }
+  Future<void> recordEnd() async {
+    await _audioRecorder.stop();
+    _audioBuffer.forEach(_audioStreamController.add);
+    _audioBuffer.clear();
+    setState(() => isRecording = false);
   }
 }
 
@@ -92,12 +143,12 @@ class _Chat extends StatelessWidget {
         children: [
           ...messages.mapIndexed((i, message) {
             final bool isLastInStreak = i < messages.lastIndex &&
-                messages[i + 1].sender != messages[i].sender;
+                messages[i + 1].author != messages[i].author;
 
             return Bubble.fromMessage(
               message,
               marginBottom: isLastInStreak ? 8 : 2,
-              sent: messages[i].sender == MessageSender.user,
+              sent: messages[i].author == MessageAuthor.user,
             );
           })
         ],
@@ -106,12 +157,14 @@ class _Chat extends StatelessWidget {
 
 class _ResponseField extends StatefulWidget {
   const _ResponseField({
-    required this.onSubmit,
+    this.controller,
+    this.onSubmit,
     this.active = true,
   });
 
   final bool active;
-  final void Function(String) onSubmit;
+  final TextEditingController? controller;
+  final void Function(String)? onSubmit;
 
   @override
   State<_ResponseField> createState() => __ResponseFieldState();
@@ -125,7 +178,7 @@ class __ResponseFieldState extends State<_ResponseField> {
   @override
   void initState() {
     super.initState();
-    _controller = TextEditingController();
+    _controller = widget.controller ?? TextEditingController();
   }
 
   @override
@@ -139,6 +192,7 @@ class __ResponseFieldState extends State<_ResponseField> {
         padding: const EdgeInsets.all(16),
         child: CupertinoTextField(
           controller: _controller,
+          enabled: widget.controller == null,
           maxLines: null,
           onSubmitted: (_) => _onSubmit(),
           placeholder: 'Message',
@@ -160,9 +214,9 @@ class __ResponseFieldState extends State<_ResponseField> {
       );
 
   void _onSubmit() {
-    if (!hasValidInput || !widget.active) return;
+    if (!hasValidInput || !widget.active || widget.onSubmit == null) return;
 
-    widget.onSubmit(_controller.text);
+    widget.onSubmit!(_controller.text);
     _controller.clear();
   }
 }

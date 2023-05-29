@@ -1,0 +1,1 @@
+protoc $1 --dart_out=grpc:lib/models/generated --proto_path ./lib/models/protos

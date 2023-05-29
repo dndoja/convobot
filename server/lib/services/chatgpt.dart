@@ -1,16 +1,13 @@
 import 'package:common/models/models.dart';
-import 'package:edge_http_client/edge_http_client.dart';
 import 'package:openai_client/openai_client.dart';
 // ignore: implementation_imports
 import 'package:openai_client/src/model/openai_chat/chat_message.dart';
-
-import 'package:supabase_functions/supabase_functions.dart';
+import 'package:server/services/secrets.dart';
 
 late final OpenAIClient _client;
 
-void initializeOpenAI(EdgeHttpClient? edgeClient) => _client = OpenAIClient(
-      configuration: OpenAIConfiguration(apiKey: Deno.env.get('OPENAI_KEY')!),
-      httpClient: edgeClient,
+void initializeOpenAI() => _client = OpenAIClient(
+      configuration: OpenAIConfiguration(apiKey: Secrets.get().openAiKey),
     );
 
 Future<ConversationMessage> sendMessagesToChatGPT(
@@ -22,7 +19,7 @@ Future<ConversationMessage> sendMessagesToChatGPT(
           messages: messages
               .map(
                 (m) => ChatMessage(
-                  role: m.sender.openAiMessageRole,
+                  role: m.author.openAiMessageRole,
                   content: m.text,
                 ),
               )
@@ -31,20 +28,22 @@ Future<ConversationMessage> sendMessagesToChatGPT(
         .data
         .then(
           (r) => ConversationMessage(
-            sender: MessageSender.ai,
+            author: MessageAuthor.ai,
             text: r.choices.map((c) => c.message.content).join('\n'),
           ),
         );
 
-extension on MessageSender {
+extension on MessageAuthor {
   String get openAiMessageRole {
     switch (this) {
-      case MessageSender.ai:
+      case MessageAuthor.ai:
         return 'assistant';
-      case MessageSender.user:
+      case MessageAuthor.user:
         return 'user';
-      case MessageSender.narrator:
+      case MessageAuthor.narrator:
         return 'system';
+      default:
+        throw Exception('You should have never come here!');
     }
   }
 }
